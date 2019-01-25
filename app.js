@@ -5,14 +5,14 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const users = require('./routes/users')
 const history = require('./middleware/koa2-connect-history-api-fallback');
 const mongoose = require('./config/mongoose.js');
 const db = mongoose();
-// const users = require('./routes/users')
 
 // error handler
 onerror(app)
-app.use(history({verbose: true}));
+// app.use(history({verbose: true}));
 // middlewares
 app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
@@ -34,7 +34,7 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-// app.use(users.routes(), users.allowedMethods())
+app.use(users.routes(), users.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
