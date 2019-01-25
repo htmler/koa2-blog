@@ -6,6 +6,8 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const history = require('./middleware/koa2-connect-history-api-fallback');
+const mongoose = require('./config/mongoose.js');
+const db = mongoose();
 // const users = require('./routes/users')
 
 // error handler
