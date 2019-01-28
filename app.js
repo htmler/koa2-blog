@@ -6,21 +6,20 @@ const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const users = require('./routes/users')
-const history = require('./middleware/koa2-connect-history-api-fallback');
+const history = require('koa2-connect-history-api-fallback');
 const mongoose = require('./config/mongoose.js');
 const db = mongoose();
 
 // error handler
 onerror(app)
-// app.use(history({verbose: true}));
 // middlewares
 app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
 }))
 app.use(json())
 app.use(logger())
+app.use(history({whiteList:['/api']}));
 app.use(require('koa-static')(__dirname + '/public/dist'))
-
 app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
@@ -35,7 +34,6 @@ app.use(async (ctx, next) => {
 
 // routes
 app.use(users.routes(), users.allowedMethods())
-
 // error-handling
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)

@@ -1,8 +1,8 @@
 const router = require('koa-router')()
 const File = require('../models/File')
-router.prefix('/users')
+router.prefix('/api')
 
-router.get('/', function (ctx, next) {
+router.get('/file', function (ctx, next) {
   let file  = new File({
     title:'如何成功的写文章',
     author:'陈前',
