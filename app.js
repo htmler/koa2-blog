@@ -8,8 +8,18 @@ const logger = require('koa-logger')
 const users = require('./routes/users')
 const history = require('koa2-connect-history-api-fallback');
 const mongoose = require('./config/mongoose.js');
+const cors = require('koa2-cors');
 const db = mongoose();
-
+app.use(cors({
+  origin: function (ctx) {
+      return '*';
+  },
+  exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+  maxAge: 5,
+  credentials: true,
+  allowMethods: ['GET', 'POST', 'DELETE'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+}))
 // error handler
 onerror(app)
 // middlewares

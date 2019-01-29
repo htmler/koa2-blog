@@ -2,27 +2,25 @@ const router = require('koa-router')()
 const File = require('../models/File')
 router.prefix('/api')
 
-router.get('/file', function (ctx, next) {
-  let file  = new File({
-    title:'如何成功的写文章',
-    author:'陈前',
-    imgUrl:'www.baidu.com',
-    content:'简单点',
-    startTime:'2018-03-08',
-    summary:'简介',
-    isBanner:false,
-    link:'www.baidu.com',
-    keyWords:[
-      '原创',
-      '转载'
-    ]
-  });
-  file.save((err) =>{
-    console.log('保存成功');
-  })
+router.get('/fileList', async (ctx, next) => {
+      const result  = await  File.find()
+      ctx.body = result;
 })
 
-router.get('/bar', function (ctx, next) {
+router.post('/fileSave', async (ctx, next) => {
+  let obj = ctx.request.body;
+  let file  = new File(obj);
+  console.log(file)
+  let result  = await file.save((err,data) =>{
+    if(err){
+      return err
+    }else{
+      return data
+    }
+  })
+  ctx.body = result
+})
+router.get('/user', function (ctx, next) {
   ctx.body = 'this is a users/bar response'
 })
 

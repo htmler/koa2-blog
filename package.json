@@ -21,6 +21,7 @@
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
     "koa2-connect-history-api-fallback": "0.0.6",
+    "koa2-cors": "^2.0.6",
     "mongoose": "^5.4.6",
     "pug": "^2.0.0-rc.1"
   },

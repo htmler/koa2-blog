@@ -4,12 +4,10 @@ var Schema = mongoose.Schema;
 var fileSchema = new Schema({
     title:String,
     author:String,
-    imgUrl:String,
     content:String,
-    startTime:String,
-    summary:String,
-    isBanner:Boolean,
-    link:String,
-    keyWords:Array
+    date1:String,
+    desc:String,
+    delivery:Boolean,
+    type:Array
 });
 module.exports = fileSchema;
