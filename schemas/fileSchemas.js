@@ -8,6 +8,7 @@ var fileSchema = new Schema({
     date1:String,
     desc:String,
     delivery:Boolean,
-    type:Array
+    type:Array,
+    tag:String
 });
 module.exports = fileSchema;

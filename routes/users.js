@@ -3,7 +3,14 @@ const File = require('../models/File')
 router.prefix('/api')
 
 router.get('/fileList', async (ctx, next) => {
-      const result  = await  File.find()
+      const params = ctx.query
+      const result  = await  File.find({tag:params.tag},function(err,data){
+        if(err){
+          return err;
+        }else{
+          return data;
+        }
+      })
       ctx.body = result;
 })
 
