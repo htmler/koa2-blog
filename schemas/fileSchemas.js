@@ -9,6 +9,8 @@ var fileSchema = new Schema({
     desc:String,
     delivery:Boolean,
     type:Array,
+    imageUrl:String,
+    avater:String,
     tag:String
-});
+},{strict:false});
 module.exports = fileSchema;
