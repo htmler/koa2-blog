@@ -8,6 +8,7 @@ const logger = require('koa-logger')
 const users = require('./routes/users')
 const history = require('koa2-connect-history-api-fallback');
 const mongoose = require('./config/mongoose.js');
+const koaBody = require('koa-body');
 const cors = require('koa2-cors');
 const db = mongoose();
 app.use(cors({
@@ -23,12 +24,18 @@ app.use(cors({
 // error handler
 onerror(app)
 // middlewares
+app.use(koaBody({
+  multipart: true,
+  formidable: {
+      maxFileSize: 200*1024*1024    // 设置上传文件大小最大限制，默认2M
+  }
+}));
 app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
 }))
 app.use(json())
 app.use(logger())
-app.use(history({whiteList:['/api']}));
+app.use(history({whiteList:['/api','/public']}));
 app.use(require('koa-static')(__dirname + '/public/dist'))
 app.use(views(__dirname + '/views', {
   extension: 'pug'

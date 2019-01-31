@@ -1,5 +1,7 @@
 const router = require('koa-router')()
 const File = require('../models/File')
+const fs = require('fs')
+const path  = require('path')
 router.prefix('/api')
 
 router.get('/fileList', async (ctx, next) => {
@@ -41,7 +43,7 @@ router.post('/fileDetail', async (ctx, next) => {
 router.post('/fileEdit', async (ctx, next) => {
   const obj = ctx.request.body;
   console.log(obj);
-  const result = await File.update({ _id: obj._id },obj,function (err, data) {
+  const result = await File.update({ _id: obj._id }, obj, function (err, data) {
     if (err) {
       return err;
     } else {
@@ -49,6 +51,17 @@ router.post('/fileEdit', async (ctx, next) => {
     }
   })
   ctx.body = result;
+})
+router.post('/fileUpload', async (ctx, next) => {
+  const file = ctx.request.files.file;
+  const reader = fs.createReadStream(file.path);
+  let filePath = path.join(__dirname, '../public/images') + `/${file.name}`;
+  const upStream = fs.createWriteStream(filePath);
+  reader.pipe(upStream);
+  ctx.body = {
+    ...file,
+    imgUrl:`/public/images/${file.name}`
+  };
 })
 
 module.exports = router
