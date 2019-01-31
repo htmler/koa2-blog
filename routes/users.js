@@ -55,7 +55,7 @@ router.post('/fileEdit', async (ctx, next) => {
 router.post('/fileUpload', async (ctx, next) => {
   const file = ctx.request.files.file;
   const reader = fs.createReadStream(file.path);
-  let filePath = path.join(__dirname, '../public/images') + `/${file.name}`;
+  let filePath = path.join(__dirname, '../public/dist/static/img') + `/${file.name}`;
   const upStream = fs.createWriteStream(filePath);
   reader.pipe(upStream);
   ctx.body = {
