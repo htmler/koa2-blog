@@ -16,11 +16,31 @@ router.get('/fileList', async (ctx, next) => {
   })
   ctx.body = result;
 })
+router.get('/fileHomeList', async (ctx, next) => {
+  const params = ctx.query
+  const result = await File.find({ tag: params.tag }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  }).sort({view:1});
+  ctx.body = result;
+})
+router.get('/fileBannerList', async (ctx, next) => {
+  const result = await File.find({ delivery : true }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  }).limit(3);
+  ctx.body = result;
+})
 
 router.post('/fileSave', async (ctx, next) => {
   let obj = ctx.request.body;
   let file = new File(obj);
-  console.log(file)
   let result = await file.save((err, data) => {
     if (err) {
       return err
