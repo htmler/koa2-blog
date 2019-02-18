@@ -1,7 +1,7 @@
 const router = require('koa-router')()
 const File = require('../models/File')
 const fs = require('fs')
-const path  = require('path')
+const path = require('path')
 const markdown = require("markdown").markdown;
 router.prefix('/api')
 
@@ -24,17 +24,43 @@ router.get('/fileHomeList', async (ctx, next) => {
     } else {
       return data;
     }
-  }).sort({view:1});
+  }).sort({ view: 1 });
   ctx.body = result;
 })
 router.get('/fileBannerList', async (ctx, next) => {
-  const result = await File.find({ delivery : true }, function (err, data) {
+  const result = await File.find({ delivery: true }, function (err, data) {
     if (err) {
       return err;
     } else {
       return data;
     }
   }).limit(3);
+  ctx.body = result;
+})
+router.get('/fileBannerList', async (ctx, next) => {
+  const result = await File.find({ delivery: true }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  }).limit(3);
+  ctx.body = result;
+})
+router.get('/fileAmuseBannerList', async (ctx, next) => {
+  const result = await File.find({
+    $or: [
+      { tag: 'music' },
+      { tag: 'video' },
+    ],
+    delivery:true
+  }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  });
   ctx.body = result;
 })
 
@@ -81,7 +107,7 @@ router.post('/fileUpload', async (ctx, next) => {
   reader.pipe(upStream);
   ctx.body = {
     ...file,
-    imgUrl:`http://localhost:3000/static/img/${file.name}`,
+    imgUrl: `http://localhost:3000/static/img/${file.name}`,
   };
 })
 
