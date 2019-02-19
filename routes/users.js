@@ -16,6 +16,21 @@ router.get('/fileList', async (ctx, next) => {
   })
   ctx.body = result;
 })
+router.get('/fileAmuseList', async (ctx, next) => {
+  const result = await File.find({
+    $or: [
+      { tag: 'music' },
+      { tag: 'video' },
+    ],
+  }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  });
+  ctx.body = result;
+})
 router.get('/fileHomeList', async (ctx, next) => {
   const params = ctx.query
   const result = await File.find({ tag: params.tag }, function (err, data) {
@@ -24,7 +39,7 @@ router.get('/fileHomeList', async (ctx, next) => {
     } else {
       return data;
     }
-  }).sort({ view: 1 });
+  }).sort({ view: -1 });
   ctx.body = result;
 })
 router.get('/fileBannerList', async (ctx, next) => {
