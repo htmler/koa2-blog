@@ -1,10 +1,83 @@
 const router = require('koa-router')()
 const File = require('../models/File')
+const User = require('../models/user')
 const fs = require('fs')
 const path = require('path')
 const markdown = require("markdown").markdown;
 router.prefix('/api')
-
+router.post('/register', async (ctx, next) => {
+  let obj = ctx.request.body;
+  let findResult = await User.find({ username: obj.username }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  })
+  if (findResult.length > 1) {
+    ctx.body = {
+      errMessage: '该用户名已存在',
+      status: false
+    }
+  } else {
+    let user = new User(obj);
+    let result = await user.save((err, data) => {
+      if (err) {
+        return err
+      } else {
+        return data
+      }
+    })
+    ctx.body = {
+      ...result,
+      status: true
+    }
+  }
+})
+router.get('/login', async (ctx, next) => {
+  const params = ctx.query
+  let result = await User.findOne({ username: params.username }, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  })
+  console.log(result);
+  if (!result) {
+    ctx.body = {
+      errMessage: '该用户不存在',
+      status: false
+    }
+  } else {
+    let result = await User.findOne({ username: params.username, password:params.password }, function (err, data) {
+      if (err) {
+        return err;
+      } else {
+        return data;
+      }
+    })
+    if (!result) {
+      ctx.body = {
+        errMessage: '密码输入不正确',
+        status: false
+      }
+    }else{
+      if(result.username === 'system'){
+        ctx.body = {
+          ...result,
+          isSystem:true,
+          status: true
+        }
+      }else{
+        ctx.body = {
+          ...result,
+          status: true
+        }
+      }
+    }
+  }
+})
 router.get('/fileList', async (ctx, next) => {
   const params = ctx.query
   const result = await File.find({ tag: params.tag }, function (err, data) {
@@ -68,7 +141,7 @@ router.get('/fileAmuseBannerList', async (ctx, next) => {
       { tag: 'music' },
       { tag: 'video' },
     ],
-    delivery:true
+    delivery: true
   }, function (err, data) {
     if (err) {
       return err;
