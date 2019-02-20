@@ -4,9 +4,20 @@ const User = require('../models/user')
 const fs = require('fs')
 const path = require('path')
 const markdown = require("markdown").markdown;
+const createToken = require('../token/createToken');
+const sha1 = require('sha1');
+const moment = require('moment');
+const objectIdToTimestamp = require('objectid-to-timestamp');
+const checkToken = require('../token/checkToken');
 router.prefix('/api')
 router.post('/register', async (ctx, next) => {
   let obj = ctx.request.body;
+  let username = obj.username;
+  // obj = {
+  //   ...obj,
+  //   // create_time: moment(objectIdToTimestamp(obj._id)).format('YYYY-MM-DD HH:mm:ss')
+  // }
+  console.log(obj);
   let findResult = await User.find({ username: obj.username }, function (err, data) {
     if (err) {
       return err;
@@ -43,14 +54,13 @@ router.get('/login', async (ctx, next) => {
       return data;
     }
   })
-  console.log(result);
   if (!result) {
     ctx.body = {
       errMessage: '该用户不存在',
       status: false
     }
   } else {
-    let result = await User.findOne({ username: params.username, password:params.password }, function (err, data) {
+    let result = await User.findOne({ username: params.username, password: params.password }, function (err, data) {
       if (err) {
         return err;
       } else {
@@ -62,14 +72,23 @@ router.get('/login', async (ctx, next) => {
         errMessage: '密码输入不正确',
         status: false
       }
-    }else{
-      if(result.username === 'system'){
+    } else {
+      let token = createToken(params.username);
+      result.token = token;
+      let upDoc = await User.update({ _id: result._id }, result, function (err, data) {
+        if (err) {
+          return err;
+        } else {
+          return data;
+        }
+      })
+      if (result.username === 'system') {
         ctx.body = {
           ...result,
-          isSystem:true,
+          isSystem: true,
           status: true
         }
-      }else{
+      } else {
         ctx.body = {
           ...result,
           status: true
@@ -104,7 +123,7 @@ router.get('/fileAmuseList', async (ctx, next) => {
   });
   ctx.body = result;
 })
-router.get('/fileHomeList', async (ctx, next) => {
+router.get('/fileHomeList',checkToken, async (ctx, next) => {
   const params = ctx.query
   const result = await File.find({ tag: params.tag }, function (err, data) {
     if (err) {
@@ -188,7 +207,6 @@ router.post('/fileEdit', async (ctx, next) => {
 })
 router.post('/fileUpload', async (ctx, next) => {
   const file = ctx.request.files.file;
-  console.log(file)
   const reader = fs.createReadStream(file.path);
   let filePath = path.join(__dirname, '../public/dist/static/img') + `/${file.name}`;
   const upStream = fs.createWriteStream(filePath);
