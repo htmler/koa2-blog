@@ -1,6 +1,7 @@
 const router = require('koa-router')()
 const File = require('../models/File')
 const User = require('../models/user')
+const Discuss = require('../models/discuss')
 const fs = require('fs')
 const path = require('path')
 const markdown = require("markdown").markdown;
@@ -13,11 +14,10 @@ router.prefix('/api')
 router.post('/register', async (ctx, next) => {
   let obj = ctx.request.body;
   let username = obj.username;
-  // obj = {
-  //   ...obj,
-  //   // create_time: moment(objectIdToTimestamp(obj._id)).format('YYYY-MM-DD HH:mm:ss')
-  // }
-  console.log(obj);
+  obj = {
+    ...obj,
+    token:createToken(username)
+  }
   let findResult = await User.find({ username: obj.username }, function (err, data) {
     if (err) {
       return err;
@@ -97,6 +97,11 @@ router.get('/login', async (ctx, next) => {
     }
   }
 })
+router.get('/status',checkToken, async (ctx, next) => {
+  ctx.body = {
+    isSuccess:true
+  };
+})
 router.get('/fileList', async (ctx, next) => {
   const params = ctx.query
   const result = await File.find({ tag: params.tag }, function (err, data) {
@@ -123,7 +128,7 @@ router.get('/fileAmuseList', async (ctx, next) => {
   });
   ctx.body = result;
 })
-router.get('/fileHomeList',checkToken, async (ctx, next) => {
+router.get('/fileHomeList', async (ctx, next) => {
   const params = ctx.query
   const result = await File.find({ tag: params.tag }, function (err, data) {
     if (err) {
@@ -215,6 +220,41 @@ router.post('/fileUpload', async (ctx, next) => {
     ...file,
     imgUrl: `http://localhost:3000/static/img/${file.name}`,
   };
+})
+// 用户接口
+router.get('/userInfo', async (ctx, next) => {
+  const params = ctx.query
+  const result = await User.findOne({username:params.username}, function (err, data) {
+    if (err) {
+      return err;
+    } else {
+      return data;
+    }
+  });
+  ctx.body = result;
+})
+// 评论接口
+router.post('/discussSave', async (ctx, next) => {
+  let obj = ctx.request.body;
+  let discuss = new Discuss(obj);
+  let result = await discuss.save((err, data) => {
+    if (err) {
+      return err
+    } else {
+      return data
+    }
+  })
+  ctx.body = result
+})
+router.get('/discussList', async (ctx, next) => {
+  let result = await Discuss.find((err, data) => {
+    if (err) {
+      return err
+    } else {
+      return data
+    }
+  })
+  ctx.body = result
 })
 
 module.exports = router
