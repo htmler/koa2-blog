@@ -9,6 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@baiducloud/sdk": "^1.0.0-rc.5",
+    "ali-oss": "^6.1.0",
     "busboy": "^0.3.0",
     "connect-history-api-fallback": "^1.6.0",
     "debug": "^2.6.3",

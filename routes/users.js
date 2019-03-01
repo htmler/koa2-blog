@@ -11,6 +11,14 @@ const moment = require('moment');
 const os = require('os');
 const objectIdToTimestamp = require('objectid-to-timestamp');
 const checkToken = require('../token/checkToken');
+let OSS = require('ali-oss');
+let client = new OSS({
+  region: 'oss-cn-beijing',
+  //云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，部署在服务端使用RAM子账号或STS，部署在客户端使用STS。
+  accessKeyId: 'LTAIp7UWQxgZaE81',
+  accessKeySecret: 'fZgBLurtYpcVFtqAV1O1KRWlsLN6Yp',
+  bucket: 'client-cq',
+});
 router.prefix('/api')
 router.post('/system', async (ctx, next) => {
   let { parseInt } = Number;
@@ -234,14 +242,12 @@ router.post('/fileEdit', async (ctx, next) => {
   ctx.body = result;
 })
 router.post('/fileUpload', async (ctx, next) => {
+  client.useBucket('client-cq');
   const file = ctx.request.files.file;
-  const reader = fs.createReadStream(file.path);
-  let filePath = path.join(__dirname, '../public/dist/static/img') + `/${file.name}`;
-  const upStream = fs.createWriteStream(filePath);
-  reader.pipe(upStream);
+  let result = await client.put(file.name, file.path);
   ctx.body = {
     ...file,
-    imgUrl: `http://localhost:3000/static/img/${file.name}`,
+    imgUrl:result.url
   };
 })
 // 用户接口
