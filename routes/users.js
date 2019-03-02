@@ -243,8 +243,15 @@ router.post('/fileEdit', async (ctx, next) => {
 })
 router.post('/fileUpload', async (ctx, next) => {
   client.useBucket('client-cq');
-  const file = ctx.request.files.file;
-  let result = await client.put(file.name, file.path);
+  let file;
+  let result;
+  if(ctx.request.files.file){
+    file = ctx.request.files.file;
+    result = await client.put(file.name, file.path);
+  }else{
+    file = ctx.request.files.image;
+    result = await client.put(file.name, file.path);
+  }
   ctx.body = {
     ...file,
     imgUrl:result.url
