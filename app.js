@@ -5,7 +5,9 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
-const users = require('./routes/users')
+const users = require('./routes/usersRouter')
+const fileRouter = require('./routes/fileRouter')
+const discussRouter = require('./routes/discussRouter')
 const history = require('koa2-connect-history-api-fallback');
 const mongoose = require('./config/mongoose.js');
 const koaBody = require('koa-body');
@@ -52,6 +54,8 @@ app.use(async (ctx, next) => {
 
 // routes
 app.use(users.routes(), users.allowedMethods())
+app.use(fileRouter.routes(), fileRouter.allowedMethods())
+app.use(discussRouter.routes(), discussRouter.allowedMethods())
 // error-handling
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
