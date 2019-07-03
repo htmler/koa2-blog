@@ -129,5 +129,16 @@ router.post('/fileUpload', async (ctx, next) => {
         imgUrl: result.url
     };
 })
+router.get('/fileRemove', async (ctx, next) => {
+    const params = ctx.query
+    const result = await File.remove({ _id: params.id }, function (err, data) {
+        if (err) {
+            return err;
+        } else {
+            return data;
+        }
+    })
+    ctx.body = result;
+})
 
 module.exports = router
