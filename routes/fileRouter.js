@@ -1,20 +1,21 @@
 const router = require('koa-router')()
 const Discuss = require('../models/discuss')
 const File = require('../models/File')
+const Content = require('../models/content')
 const path = require('path')
 const checkToken = require('../token/checkToken');
 let OSS = require('ali-oss');
 let client = new OSS({
-  region: 'oss-cn-beijing',
-  //云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，部署在服务端使用RAM子账号或STS，部署在客户端使用STS。
-  accessKeyId: 'LTAIp7UWQxgZaE81',
-  accessKeySecret: 'fZgBLurtYpcVFtqAV1O1KRWlsLN6Yp',
-  bucket: 'client-cq',
+    region: 'oss-cn-beijing',
+    //云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，部署在服务端使用RAM子账号或STS，部署在客户端使用STS。
+    accessKeyId: 'LTAIp7UWQxgZaE81',
+    accessKeySecret: 'fZgBLurtYpcVFtqAV1O1KRWlsLN6Yp',
+    bucket: 'client-cq',
 });
 router.prefix('/api')
 router.get('/fileList', async (ctx, next) => {
     const params = ctx.query
-    const result = await File.find({ tag: params.tag }, function (err, data) {
+    let result = await File.find({ tag: params.tag }, function (err, data) {
         if (err) {
             return err;
         } else {
@@ -81,29 +82,51 @@ router.get('/fileAmuseBannerList', async (ctx, next) => {
 })
 router.post('/fileSave', async (ctx, next) => {
     let obj = ctx.request.body;
+    let content = obj.content;
+    delete obj.content;
     let file = new File(obj);
-    let result = await file.save((err, data) => {
-        if (err) {
-            return err
-        } else {
-            return data
-        }
-    })
-    ctx.body = result
+    const result = await file.save()
+    let contentObj = {
+        contentId: result.contentId,
+        content: content
+    }
+    const contentResult = await new Content(contentObj).save()
+    ctx.body = contentResult
 })
 router.post('/fileDetail', async (ctx, next) => {
     const obj = ctx.request.body;
-    const result = await File.findOne({ _id: obj.id }, function (err, data) {
+    let contentResult = '';
+    let result = '';
+    const fileResult = await File.findOne({ _id: obj.id }, function (err, data) {
         if (err) {
             return err;
         } else {
             return data;
         }
     })
+    if (fileResult.contentId) {
+        contentResult = await Content.findOne({ contentId: fileResult.contentId }, function (err, data) {
+            if (err) {
+                return err;
+            } else {
+                return data;
+            }
+        })
+        result = {
+            ...fileResult._doc,
+            content: contentResult.content,
+        }
+    } else {
+        result = {
+            ...fileResult._doc,
+        }
+    }
     ctx.body = result;
 })
 router.post('/fileEdit', async (ctx, next) => {
-    const obj = ctx.request.body;
+    let obj = ctx.request.body;
+    let content = obj.content;
+    delete obj.content;
     const result = await File.update({ _id: obj._id }, obj, function (err, data) {
         if (err) {
             return err;
@@ -111,7 +134,17 @@ router.post('/fileEdit', async (ctx, next) => {
             return data;
         }
     })
-    ctx.body = result;
+    let contentObj = {
+        content: content
+    }
+    const contentResult = await Content.update({ contentId: obj.contentId }, contentObj, function (err, data) {
+        if (err) {
+            return err;
+        } else {
+            return data;
+        }
+    })
+    ctx.body = contentResult;
 })
 router.post('/fileUpload', async (ctx, next) => {
     client.useBucket('client-cq');
